@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BrainMode — Chat</title>
+  
+<style>
+:root{
+  --bg:#0b1220; --panel:#0f172a; --panel2:#0b1324; --line:#223047;
+  --muted:#8fa3bf; --text:#e7eefc; --title:#f3f6ff;
+  --accent:#4f8cff; --accent2:#2f6cf6;
+  --good:#22c55e; --bad:#ef4444;
+  --shadow:0 16px 40px rgba(0,0,0,.35);
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background:
+    radial-gradient(900px 500px at 20% -10%, rgba(79,140,255,.18), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(34,197,94,.09), transparent 65%),
+    var(--bg);
+}
+a{ color:inherit; text-decoration:none }
+
+.top-bar{
+  position:sticky; top:0; z-index:50;
+  display:flex; justify-content:space-between; align-items:center; gap:16px;
+  padding:14px 18px;
+  background: rgba(11,19,36,.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(34,48,71,.7);
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:800; color:var(--title);
+  letter-spacing:.2px;
+}
+.brand-dot{
+  width:10px;height:10px;border-radius:999px;
+  background: linear-gradient(180deg, var(--accent), rgba(79,140,255,.35));
+  box-shadow: 0 0 24px rgba(79,140,255,.45);
+}
+.nav-desktop{
+  display:flex; gap:10px; align-items:center;
+}
+.nav-desktop a{
+  color: var(--muted);
+  font-size:13px;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid transparent;
+}
+.nav-desktop a:hover{
+  color: var(--text);
+  background: rgba(79,140,255,.10);
+  border-color: rgba(79,140,255,.18);
+}
+
+.page{
+  max-width:1040px;
+  margin:0 auto;
+  padding: 22px 18px 40px;
+}
+.grid-two{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:16px;
+}
+@media (min-width: 980px){
+  .grid-two{
+    grid-template-columns: 1fr 420px;
+    align-items:start;
+  }
+}
+
+.exercise-card{
+  background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(11,19,36,.95));
+  border: 1px solid rgba(34,48,71,.9);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 18px 18px 16px;
+}
+.exercise-head{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+  margin-bottom: 12px;
+}
+.exercise-title{
+  font-size: 15px; font-weight: 750; color: var(--title);
+}
+.exercise-meta{
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;
+}
+.badge{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:12px; color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(34,48,71,.9);
+  background: rgba(2,6,23,.25);
+}
+.statement{
+  margin: 14px 0 10px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.9);
+  background: rgba(2,6,23,.30);
+  font-size: 15px;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.section-label{
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing:.4px;
+  text-transform: uppercase;
+}
+.mcq-grid{ display:grid; gap:10px; }
+.mcq-option{
+  width:100%;
+  text-align:left;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.30);
+  color: var(--text);
+  cursor:pointer;
+  transition: transform .06s ease, border-color .12s ease, background .12s ease;
+  display:flex; align-items:flex-start; gap:10px;
+}
+.mcq-option:hover{
+  border-color: rgba(79,140,255,.55);
+  background: rgba(79,140,255,.08);
+}
+.mcq-option.selected{
+  border-color: rgba(79,140,255,.95);
+  background: rgba(79,140,255,.16);
+  box-shadow: 0 0 0 2px rgba(79,140,255,.12) inset;
+}
+.mcq-letter{
+  width:26px;height:26px;border-radius:10px;
+  display:grid; place-items:center;
+  border:1px solid rgba(34,48,71,.95);
+  background: rgba(15,23,42,.75);
+  color: var(--title); font-weight:800;
+  flex: 0 0 auto;
+}
+.answer-box{ display:flex; gap:10px; margin-top:12px; }
+.input{
+  flex:1;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.30);
+  color: var(--text);
+  outline:none;
+}
+.input:focus{
+  border-color: rgba(79,140,255,.85);
+  box-shadow: 0 0 0 3px rgba(79,140,255,.14);
+}
+.btn{
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(79,140,255,.55);
+  background: linear-gradient(180deg, rgba(79,140,255,.95), rgba(47,108,246,.92));
+  color: #071225;
+  font-weight: 850;
+  cursor:pointer;
+  transition: transform .06s ease, filter .12s ease;
+}
+.btn:hover{ filter: brightness(1.05); }
+.btn:active{ transform: scale(.995); }
+.ghost{
+  background: rgba(2,6,23,.25);
+  color: var(--text);
+  border: 1px solid rgba(34,48,71,.95);
+}
+.ghost:hover{
+  border-color: rgba(79,140,255,.55);
+  background: rgba(79,140,255,.08);
+}
+
+.feedback{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.20);
+  color: var(--muted);
+  font-size: 13px;
+  min-height: 42px;
+}
+.feedback.ok{ border-color: rgba(34,197,94,.35); color: rgba(226,255,240,.92); }
+.feedback.bad{ border-color: rgba(239,68,68,.35); color: rgba(255,235,235,.92); }
+
+.side-card{
+  background: rgba(15,23,42,.85);
+  border: 1px solid rgba(34,48,71,.9);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+.side-title{
+  font-size: 13px;
+  color: var(--title);
+  font-weight: 750;
+  margin-bottom: 10px;
+}
+.muted{ color: var(--muted); font-size: 13px; }
+
+.train-layout{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:16px;
+}
+@media (min-width: 980px){
+  .train-layout{
+    grid-template-columns: 1.15fr .85fr;
+    height: calc(100vh - 56px);
+    padding: 18px;
+  }
+  .train-layout > .exercise-card{ height:100%; overflow:auto; }
+  .train-chat{
+    height:100%;
+    overflow:hidden;
+    border-radius: var(--r);
+    border: 1px solid rgba(34,48,71,.9);
+    background: rgba(15,23,42,.85);
+    box-shadow: var(--shadow);
+  }
+}
+.train-chat iframe{ width:100%; height:100%; border:0; }
+.train-chat-toggle{ display:none; }
+@media (max-width: 980px){
+  .train-layout{ padding:14px 12px 22px; }
+  .train-chat-toggle{ display:flex; gap:10px; margin-top:12px; }
+  .train-chat-toggle .btn{ flex:1; }
+  .train-chat.collapsed{ display:none; }
+  .train-chat{ height: 420px; }
+}
+
+/* Mobile bottom nav */
+.bottom-nav{
+  display:none;
+}
+@media (max-width: 720px){
+  .nav-desktop{ display:none; }
+  .page{ padding-bottom: 92px; }
+  .answer-box{ flex-direction:column; }
+  .btn, .input{ width:100%; }
+  .bottom-nav{
+    display:flex;
+    position:fixed;
+    left:0; right:0; bottom:0;
+    padding:10px 12px 12px;
+    background: rgba(2,6,23,.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(34,48,71,.75);
+    gap:10px;
+    z-index:200;
+  }
+  .bottom-nav a{
+    flex:1;
+    text-align:center;
+    padding:10px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(34,48,71,.9);
+    background: rgba(15,23,42,.75);
+    color: var(--muted);
+    font-weight: 750;
+    font-size: 12px;
+  }
+  .bottom-nav a.active{
+    color: var(--title);
+    border-color: rgba(79,140,255,.7);
+    background: rgba(79,140,255,.18);
+    box-shadow: 0 0 0 2px rgba(79,140,255,.10) inset;
+  }
+}
+
+  /* Quando este chat está embutido (iframe), escondemos a nave inferior */
+  .embed .bottom-nav{ display:none !important; }
+  .embed .wrap{ padding-bottom: 18px !important; }
+</style>
+
+</head>
+<body>
+
+  <header class="top-bar">
+    <div class="brand"><span class="brand-dot"></span>BrainMode</div>
+    <nav class="nav-desktop">
+      <a href="chat.html">Chat</a>
+      <a href="index.html">Exercícios</a>
+      <a href="brainmode.html">Treino</a>
+    </nav>
+  </header>
+
+  <main class="page" style="max-width:900px;">
+    <section class="exercise-card">
+      <div class="exercise-head" style="margin-bottom:10px;">
+        <div>
+          <div class="exercise-title">Chat (BNA)</div>
+          <div class="muted">Conversa livre. No modo treino, esse chat aparece do lado pra feedback.</div>
+        </div>
+        <button class="btn ghost" type="button" id="btn-clear">Limpar</button>
+      </div>
+
+      <div class="statement" id="chat-box" style="height:50vh; overflow:auto;">
+        <div class="muted">Escreve aí. Se o backend do chat estiver ativo, ele responde.</div>
+      </div>
+
+      <div class="answer-box">
+        <input class="input" id="chat-input" type="text" placeholder="Digite sua mensagem..." />
+        <button class="btn" id="btn-send" type="button">Enviar</button>
+      </div>
+
+      <div class="feedback" id="chat-feedback">Dica: no celular, usa a barra embaixo pra alternar entre Chat / Exercícios / Treino.</div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a id="nav-chat" href="chat.html">Chat</a>
+    <a id="nav-ex" href="index.html">Exercícios</a>
+    <a id="nav-train" href="brainmode.html">Treino</a>
+  </nav>
+
+
+<script>
+(function(){
+  const p = (location.pathname || "").toLowerCase();
+  const map = [
+    {id:"nav-chat", key:"chat.html"},
+    {id:"nav-ex", key:"index.html"},
+    {id:"nav-train", key:"brainmode.html"},
+  ];
+  map.forEach(x=>{
+    const el = document.getElementById(x.id);
+    if(!el) return;
+    if(p.endsWith("/"+x.key) || p.endsWith(x.key) || (x.key==="index.html" && (p==="/" || p.endsWith("/index") || p.endsWith("/")))){
+      el.classList.add("active");
+    }
+  });
+})();
+</script>
+
+
+<script>
+  const box = document.getElementById("chat-box");
+  const input = document.getElementById("chat-input");
+  const btn = document.getElementById("btn-send");
+  const clearBtn = document.getElementById("btn-clear");
+  const fb = document.getElementById("chat-feedback");
+  const qs = new URLSearchParams(location.search);
+  const isEmbed = qs.get("embed") === "1";
+  const contextKey = qs.get("context") || "chat"; // separa memória por página
+  const mode = qs.get("mode") || (contextKey === "train" ? "train" : "chat");
+
+  if (isEmbed) document.documentElement.classList.add("embed");
+
+
+  function add(role, text){
+    const line = document.createElement("div");
+    line.style.margin = "10px 0";
+    line.innerHTML = `<div style="color:${role==='user' ? 'var(--title)' : 'var(--accent)'}; font-weight:800; font-size:12px; letter-spacing:.3px; text-transform:uppercase;">
+      ${role === 'user' ? 'Você' : 'BNA'}
+    </div>
+    <div style="margin-top:6px; color:var(--text); white-space:pre-wrap;">${escapeHtml(text)}</div>`;
+    box.appendChild(line);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function escapeHtml(s){
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  async function send(){
+    const msg = (input.value || "").trim();
+    if(!msg) return;
+    input.value = "";
+    add("user", msg);
+
+    const endpoints = ["/chat", "/api/chat", "/message"];
+    for(const url of endpoints){
+      try{
+        const r = await fetch(url, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json", "X-BM-Context": contextKey, "X-BM-Mode": mode },
+          body: JSON.stringify({ message: msg, context: contextKey, mode })
+        });
+        if(!r.ok) continue;
+        const out = await r.json();
+        const text = out?.reply || out?.message || out?.text || out?.data?.reply;
+        if(text){
+          add("assistant", text);
+          fb.textContent = "Respondido.";
+          return;
+        }
+      }catch(e){}
+    }
+
+    // fallback se não existir endpoint (pra não parecer quebrado)
+    add("assistant", "Não encontrei um endpoint de chat aqui (/chat ou /api/chat). Se teu backend usa outro caminho, me diz qual que eu plugo.");
+    fb.textContent = "Sem endpoint de chat detectado.";
+  }
+
+  btn.addEventListener("click", send);
+  input.addEventListener("keydown", (e)=>{ if(e.key==="Enter") send(); });
+  clearBtn.addEventListener("click", ()=>{
+    box.innerHTML = "";
+    fb.textContent = "Chat limpo.";
+  });
+</script>
+
+</body>
+</html>

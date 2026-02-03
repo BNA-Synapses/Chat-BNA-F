@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BrainMode — Treino</title>
+  
+<style>
+:root{
+  --bg:#0b1220; --panel:#0f172a; --panel2:#0b1324; --line:#223047;
+  --muted:#8fa3bf; --text:#e7eefc; --title:#f3f6ff;
+  --accent:#4f8cff; --accent2:#2f6cf6;
+  --good:#22c55e; --bad:#ef4444;
+  --shadow:0 16px 40px rgba(0,0,0,.35);
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background:
+    radial-gradient(900px 500px at 20% -10%, rgba(79,140,255,.18), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(34,197,94,.09), transparent 65%),
+    var(--bg);
+}
+a{ color:inherit; text-decoration:none }
+
+.top-bar{
+  position:sticky; top:0; z-index:50;
+  display:flex; justify-content:space-between; align-items:center; gap:16px;
+  padding:14px 18px;
+  background: rgba(11,19,36,.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(34,48,71,.7);
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:800; color:var(--title);
+  letter-spacing:.2px;
+}
+.brand-dot{
+  width:10px;height:10px;border-radius:999px;
+  background: linear-gradient(180deg, var(--accent), rgba(79,140,255,.35));
+  box-shadow: 0 0 24px rgba(79,140,255,.45);
+}
+.nav-desktop{
+  display:flex; gap:10px; align-items:center;
+}
+.nav-desktop a{
+  color: var(--muted);
+  font-size:13px;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid transparent;
+}
+.nav-desktop a:hover{
+  color: var(--text);
+  background: rgba(79,140,255,.10);
+  border-color: rgba(79,140,255,.18);
+}
+
+.page{
+  max-width:1040px;
+  margin:0 auto;
+  padding: 22px 18px 40px;
+}
+.grid-two{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:16px;
+}
+
+
+/* Coach (feedback automático) */
+.coach{
+  margin-top:14px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  background: rgba(15, 23, 42, .45);
+  backdrop-filter: blur(10px);
+  overflow:hidden;
+}
+.coach-head{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 14px 10px;
+}
+.coach-title{ font-weight:700; font-size:15px; letter-spacing:.2px; }
+.coach-sub{ margin-top:4px; font-size:12px; opacity:.75; line-height:1.35; }
+.coach-body{ padding: 0 14px 14px; }
+.coach-bubble{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:12px 12px;
+  font-size:14px;
+  line-height:1.45;
+  background: rgba(2,6,23,.35);
+}
+.coach-quick{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.coach-quick button{
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(2,6,23,.25);
+  color: rgba(255,255,255,.9);
+  padding:8px 10px;
+  border-radius:999px;
+  font-size:12px;
+  cursor:pointer;
+}
+.coach-quick button:hover{ background: rgba(2,6,23,.45); }
+
+.coach-chat{ margin-top:12px; }
+.coach-chat.collapsed{ display:none; }
+
+.coach-thread{
+  max-height: 220px;
+  overflow:auto;
+  padding-right:4px;
+  margin-bottom:10px;
+}
+.coach-msg{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:10px 10px;
+  font-size:13px;
+  line-height:1.42;
+  margin-bottom:8px;
+  background: rgba(2,6,23,.22);
+}
+.coach-msg.me{ background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.25); }
+.coach-msg .who{ font-size:11px; opacity:.7; margin-bottom:4px; }
+.coach-compose{ display:flex; gap:10px; align-items:center; }
+.coach-compose .input{ flex:1; min-width:0; }
+
+@media (min-width: 980px){
+  .grid-two{
+    grid-template-columns: 1fr 420px;
+    align-items:start;
+  }
+}
+
+.exercise-card{
+  background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(11,19,36,.95));
+  border: 1px solid rgba(34,48,71,.9);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 18px 18px 16px;
+}
+.exercise-head{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+  margin-bottom: 12px;
+}
+.exercise-title{
+  font-size: 15px; font-weight: 750; color: var(--title);
+}
+.exercise-meta{
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;
+}
+.badge{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:12px; color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(34,48,71,.9);
+  background: rgba(2,6,23,.25);
+}
+.statement{
+  margin: 14px 0 10px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.9);
+  background: rgba(2,6,23,.30);
+  font-size: 15px;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.section-label{
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing:.4px;
+  text-transform: uppercase;
+}
+.mcq-grid{ display:grid; gap:10px; }
+.mcq-option{
+  width:100%;
+  text-align:left;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.30);
+  color: var(--text);
+  cursor:pointer;
+  transition: transform .06s ease, border-color .12s ease, background .12s ease;
+  display:flex; align-items:flex-start; gap:10px;
+}
+.mcq-option:hover{
+  border-color: rgba(79,140,255,.55);
+  background: rgba(79,140,255,.08);
+}
+.mcq-option.selected{
+  border-color: rgba(79,140,255,.95);
+  background: rgba(79,140,255,.16);
+  box-shadow: 0 0 0 2px rgba(79,140,255,.12) inset;
+}
+.mcq-letter{
+  width:26px;height:26px;border-radius:10px;
+  display:grid; place-items:center;
+  border:1px solid rgba(34,48,71,.95);
+  background: rgba(15,23,42,.75);
+  color: var(--title); font-weight:800;
+  flex: 0 0 auto;
+}
+.answer-box{ display:flex; gap:10px; margin-top:12px; }
+.input{
+  flex:1;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.30);
+  color: var(--text);
+  outline:none;
+}
+.input:focus{
+  border-color: rgba(79,140,255,.85);
+  box-shadow: 0 0 0 3px rgba(79,140,255,.14);
+}
+.btn{
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(79,140,255,.55);
+  background: linear-gradient(180deg, rgba(79,140,255,.95), rgba(47,108,246,.92));
+  color: #071225;
+  font-weight: 850;
+  cursor:pointer;
+  transition: transform .06s ease, filter .12s ease;
+}
+.btn:hover{ filter: brightness(1.05); }
+.btn:active{ transform: scale(.995); }
+.ghost{
+  background: rgba(2,6,23,.25);
+  color: var(--text);
+  border: 1px solid rgba(34,48,71,.95);
+}
+.ghost:hover{
+  border-color: rgba(79,140,255,.55);
+  background: rgba(79,140,255,.08);
+}
+
+.feedback{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.20);
+  color: var(--muted);
+  font-size: 13px;
+  min-height: 42px;
+}
+.feedback.ok{ border-color: rgba(34,197,94,.35); color: rgba(226,255,240,.92); }
+.feedback.bad{ border-color: rgba(239,68,68,.35); color: rgba(255,235,235,.92); }
+
+.side-card{
+  background: rgba(15,23,42,.85);
+  border: 1px solid rgba(34,48,71,.9);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+.side-title{
+  font-size: 13px;
+  color: var(--title);
+  font-weight: 750;
+  margin-bottom: 10px;
+}
+.muted{ color: var(--muted); font-size: 13px; }
+
+.train-layout{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:16px;
+}
+@media (min-width: 980px){
+  /* Desktop: deixa a página rolar (sem scroll embutido no card) */
+  .train-layout{
+    grid-template-columns: 1fr 440px;
+    align-items: start;
+    padding: 18px;
+  }
+  .train-layout > .exercise-card{
+    height:auto;
+    overflow: visible;
+  }
+  .train-chat{
+    height:auto;
+    overflow: visible;
+    border-radius: var(--r);
+    border: 1px solid rgba(34,48,71,.9);
+    background: rgba(15,23,42,.85);
+    box-shadow: var(--shadow);
+  }
+}
+.train-chat iframe{ width:100%; height:620px; border:0; }
+/* Mobile bottom nav */
+.bottom-nav{
+  display:none;
+}
+@media (max-width: 720px){
+  .nav-desktop{ display:none; }
+  .page{ padding-bottom: 92px; }
+  .answer-box{ flex-direction:column; }
+  .btn, .input{ width:100%; }
+  .bottom-nav{
+    display:flex;
+    position:fixed;
+    left:0; right:0; bottom:0;
+    padding:10px 12px 12px;
+    background: rgba(2,6,23,.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(34,48,71,.75);
+    gap:10px;
+    z-index:200;
+  }
+  .bottom-nav a{
+    flex:1;
+    text-align:center;
+    padding:10px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(34,48,71,.9);
+    background: rgba(15,23,42,.75);
+    color: var(--muted);
+    font-weight: 750;
+    font-size: 12px;
+  }
+  .bottom-nav a.active{
+    color: var(--title);
+    border-color: rgba(79,140,255,.7);
+    background: rgba(79,140,255,.18);
+    box-shadow: 0 0 0 2px rgba(79,140,255,.10) inset;
+  }
+}
+</style>
+
+
+  <script>
+
+  function renderStatementWithMath(el, text){
+    el.textContent = (text == null ? "" : String(text));
+    if (window.MathJax && window.MathJax.typesetPromise){
+      window.MathJax.typesetPromise([el]).catch(()=>{});
+    }
+  }
+
+  function getOptionsFromExercise(ex){
+    if(!ex) return null;
+    const opts = (ex.mcq && ex.mcq.options) || ex.options || ex.alternatives || ex.choices || ex.mcq_options || null;
+    if(Array.isArray(opts) && opts.length) return opts;
+    return null;
+  }
+
+  function renderMCQIfPresent(ex){
+    const opts = getOptionsFromExercise(ex);
+    const box = $("mcqBox");
+    const list = $("mcqOptions");
+    const ta = $("answer");
+    if(!box || !list || !ta) return;
+
+    list.innerHTML = "";
+    document.querySelectorAll('input[name="mcq"]').forEach(i=>{ i.checked=false; });
+
+    if(!opts){
+      box.style.display = "none";
+      ta.style.display = "";
+      return;
+    }
+
+    box.style.display = "";
+    ta.style.display = "none";
+
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    opts.slice(0, 10).forEach((opt, i) => {
+      const letter = letters[i] || String(i+1);
+      const text = (typeof opt === "string") ? opt : (opt?.text || opt?.label || JSON.stringify(opt));
+      const id = "mcq_" + i;
+
+      const row = document.createElement("label");
+      row.setAttribute("for", id);
+      row.style.display = "flex";
+      row.style.gap = "10px";
+      row.style.alignItems = "flex-start";
+      row.style.padding = "10px 12px";
+      row.style.borderRadius = "14px";
+      row.style.border = "1px solid rgba(255,255,255,.08)";
+      row.style.background = "rgba(255,255,255,.03)";
+      row.style.cursor = "pointer";
+
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "mcq";
+      radio.id = id;
+      radio.value = letter;
+      radio.style.marginTop = "3px";
+
+      const body = document.createElement("div");
+      body.style.flex = "1";
+      body.innerHTML = "<b style='color:rgba(255,255,255,.92)'>" + letter + ")</b> <span style='color:rgba(255,255,255,.88)'></span>";
+
+      const span = body.querySelector("span");
+      span.textContent = text;
+
+      row.appendChild(radio);
+      row.appendChild(body);
+      list.appendChild(row);
+
+      if (window.MathJax && window.MathJax.typesetPromise){
+        window.MathJax.typesetPromise([span]).catch(()=>{});
+      }
+    });
+  }
+
+  function getSelectedMCQ(){
+    const sel = document.querySelector('input[name="mcq"]:checked');
+    if(!sel) return null;
+    const letter = sel.value;
+    const label = sel.closest("label");
+    const span = label ? label.querySelector("span") : null;
+    const txt = span ? span.textContent : "";
+    return { letter, text: txt };
+  }
+
+
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']],
+        displayMath: [['\\[','\\]'], ['$$','$$']]
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+  <header class="top-bar">
+    <div class="brand"><span class="brand-dot"></span>BrainMode</div>
+    <nav class="nav-desktop">
+      <a href="chat.html">Chat</a>
+      <a href="index.html">Exercícios</a>
+      <a href="brainmode.html">Treino</a>
+    </nav>
+  </header>
+
+  <main class="train-layout">
+    <section class="exercise-card">
+      <div class="exercise-head">
+        <div>
+          <div class="exercise-title">Modo Treino</div>
+          <div class="exercise-meta">
+            <span class="badge" id="t-id">ID: <strong>—</strong></span>
+            <span class="badge" id="t-topic">Tópico: <strong>—</strong></span>
+            <span class="badge" id="t-diff">Dificuldade: <strong>—</strong></span>
+          </div>
+        </div>
+
+        <button class="btn ghost" id="t-next" type="button">Novo</button>
+      </div>
+
+      <div class="statement" id="t-statement">Carregando exercício...</div>
+
+      <div id="t-mcq-wrap" style="display:none;">
+        <div class="section-label">Alternativas</div>
+        <div class="mcq-grid" id="t-mcq-grid"></div>
+      </div>
+
+      <div class="section-label">Resposta</div>
+      <div class="answer-box">
+        <input class="input" id="t-answer" type="text" placeholder="Escreva sua resposta (e/ou selecione uma alternativa)" />
+        <button class="btn" id="t-submit" type="button">Enviar</button>
+      </div>
+      <div class="feedback" id="t-feedback">No Treino, o chat ao lado serve pra discutir o raciocínio. No celular, use “Abrir chat”.</div>
+    </section>
+
+    <section class="coach" id="coachPanel" aria-label="Feedback do BNA">
+      <div class="coach-head">
+        <div>
+          <div class="coach-title">Feedback (BNA)</div>
+          <div class="coach-sub">Automático após responder. Se quiser, aprofunde com uma pergunta ou toque num atalho.</div>
+        </div>
+        <button class="btn ghost" id="coachToggle" type="button" aria-expanded="false">Perguntar</button>
+      </div>
+
+      <div class="coach-body">
+        <div class="coach-bubble" id="coachText">Responda um exercício para eu te dar o feedback aqui.</div>
+
+        <div class="coach-quick" id="coachQuick"></div>
+
+        <div class="coach-chat collapsed" id="coachChat">
+          <div class="coach-thread" id="coachThread"></div>
+
+          <div class="coach-compose">
+            <input id="coachInput" class="input" type="text" placeholder="Faça uma pergunta sobre onde você errou (ou por quê acertou 😄)..." />
+            <button class="btn" id="coachSend" type="button">Enviar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+</main>
+<script>
+(function(){
+  const p = (location.pathname || "").toLowerCase();
+  const map = [
+    {id:"nav-chat", key:"chat.html"},
+    {id:"nav-ex", key:"index.html"},
+    {id:"nav-train", key:"brainmode.html"},
+  ];
+  map.forEach(x=>{
+    const el = document.getElementById(x.id);
+    if(!el) return;
+    if(p.endsWith("/"+x.key) || p.endsWith(x.key) || (x.key==="index.html" && (p==="/" || p.endsWith("/index") || p.endsWith("/")))){
+      el.classList.add("active");
+    }
+  });
+})();
+</script>
+
+
+<script>
+  // Treino: mesmo fetch + render do exercício, com toggle de chat no mobile
+  let ex = null;
+  let selectedMCQ = null;
+
+  // Contexto do último solve (para FEEDBACK_COACH)
+  
+  function setBadge(id, value){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const strong = el.querySelector("strong");
+    if(strong) strong.textContent = (value ?? "—");
+    else el.textContent = (value ?? "—");
+  }
+
+  function setFeedback(msg, kind){
+    const fb = document.getElementById("t-feedback");
+    fb.classList.remove("ok","bad");
+    if(kind) fb.classList.add(kind);
+    fb.textContent = msg;
+  }
+
+  function renderExercise(x){
+    ex = x;
+    selectedMCQ = null;
+
+    setBadge("t-id", x?.id ?? "—");
+    setBadge("t-topic", x?.topic ?? x?.topico ?? "—");
+    setBadge("t-diff", x?.difficulty ?? x?.dificuldade ?? "—");
+
+    const st = x?.statement || x?.enunciado || x?.question || x?.title || "Enunciado não encontrado.";
+    document.getElementById("t-statement").textContent = st;
+
+    const wrap = document.getElementById("t-mcq-wrap");
+    const grid = document.getElementById("t-mcq-grid");
+    grid.innerHTML = "";
+
+    const opts = x?.mcq?.options;
+    if(Array.isArray(opts) && opts.length){
+      wrap.style.display = "block";
+      opts.forEach((opt, i) => {
+        const letter = opt.letter || String.fromCharCode(65+i);
+        const value = opt.value ?? opt.text ?? opt.label ?? "";
+        const btn = document.createElement("button");
+        btn.className = "mcq-option";
+        btn.type = "button";
+        btn.innerHTML = `<div class="mcq-letter">${letter}</div><div>${value}</div>`;
+        btn.addEventListener("click", () => {
+          grid.querySelectorAll(".mcq-option").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          selectedMCQ = { letter, value };
+          setFeedback(`Selecionado: ${letter}) ${value}. Agora manda tua resposta ou pergunta no chat.`, null);
+        });
+        grid.appendChild(btn);
+      });
+    } else {
+      wrap.style.display = "none";
+      selectedMCQ = null;
+    }
+  }
+
+  async function fetchExercise(){
+    const endpoints = ["/exercise/next", "/exercises-random", "/exercise/random"];
+    for(const url of endpoints){
+      try{
+        const r = await fetch(url, { cache: "no-store" });
+        if(!r.ok) continue;
+        const payload = await r.json();
+        const x = payload?.data ? payload.data : payload;
+        if(x && (x.statement || x.question || x.title || x.id != null)){
+          renderExercise(x);
+          setFeedback("Exercício carregado. Responda e use o chat pra destrinchar o raciocínio.", null);
+          return;
+        }
+      }catch(e){}
+    }
+    setFeedback("Não consegui carregar exercício (endpoint não respondeu).", "bad");
+  }
+
+  async function submitAttempt(){
+    if(!ex){
+      setFeedback("Ainda não carregou exercício.", "bad");
+      return;
+    }
+
+    const typed = (document.getElementById("t-answer").value || "").trim();
+    const mcqVal = selectedMCQ ? String(selectedMCQ.value) : "";
+    const answer = typed || mcqVal;
+
+    if(!answer){
+      setFeedback("Escolha uma alternativa ou escreva uma resposta.", "bad");
+      return;
+    }
+
+    try{
+      const r = await fetch("/solve", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          exercise_id: ex.id,
+          answer,
+          response_mode: selectedMCQ ? "hybrid" : "text",
+          selected_letter: selectedMCQ ? selectedMCQ.letter : null,
+          mode: "train"
+        })
+      });
+
+      if(!r.ok){
+        setFeedback("Backend não aceitou /solve. Veja logs.", "bad");
+        return;
+      }
+
+      const out = await r.json();
+      const ok = (out?.is_correct ?? out?.correct ?? out?.ok);
+
+      if(ok === true) setFeedback("✅ Acertou. Vou te dar um feedback rapidinho aqui embaixo.", "ok");
+      else if(ok === false) setFeedback("❌ Errou. Vou te mostrar onde provavelmente desandou — sem julgamento, só matemática.", "bad");
+      else setFeedback("Resposta enviada. Vou gerar um feedback.", "neutral");
+
+      // Atualiza contexto para o FEEDBACK_COACH
+      LAST_EX = ex;
+      LAST_SOL = { user_answer: answer, correct: ok, raw: out };
+
+      // Puxa feedback automático
+      fetchCoach();
+    } catch (err) {
+      console.error(err);
+      setFeedback("Erro ao enviar resposta.", "bad");
+    }
+  }
+
+
+      
+
+// =============================
+// Feedback Coach (auto pós-solve)
+// =============================
+const coachPanel   = document.getElementById("coachPanel");
+const coachTextEl  = document.getElementById("coachText");
+const coachQuickEl = document.getElementById("coachQuick");
+const coachToggle  = document.getElementById("coachToggle");
+const coachChat    = document.getElementById("coachChat");
+const coachThread  = document.getElementById("coachThread");
+const coachInput   = document.getElementById("coachInput");
+const coachSend    = document.getElementById("coachSend");
+
+let LAST_EX = null;
+let LAST_SOL = null;
+let LAST_COACH_TEXT = "";
+
+function setCoachText(t){
+  LAST_COACH_TEXT = String(t || "");
+  coachTextEl.textContent = LAST_COACH_TEXT || "Responda um exercício para eu te dar o feedback aqui.";
+}
+
+function clearQuick(){
+  coachQuickEl.innerHTML = "";
+}
+
+function renderQuickReplies(list){
+  clearQuick();
+  const items = Array.isArray(list) ? list : [];
+  if (!items.length) return;
+
+  items.slice(0,6).forEach((txt) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = txt;
+    b.addEventListener("click", () => {
+      // abre o mini-chat e manda a pergunta pronta
+      openCoachChat();
+      coachAsk(txt);
+    });
+    coachQuickEl.appendChild(b);
+  });
+}
+
+function openCoachChat(){
+  coachChat.classList.remove("collapsed");
+  coachToggle.setAttribute("aria-expanded","true");
+  coachToggle.textContent = "Fechar";
+}
+
+function closeCoachChat(){
+  coachChat.classList.add("collapsed");
+  coachToggle.setAttribute("aria-expanded","false");
+  coachToggle.textContent = "Perguntar";
+}
+
+coachToggle?.addEventListener("click", () => {
+  if (coachChat.classList.contains("collapsed")) openCoachChat();
+  else closeCoachChat();
+});
+
+function appendCoachMsg(who, text){
+  const div = document.createElement("div");
+  div.className = "coach-msg " + (who === "Você" ? "me" : "bna");
+  div.innerHTML = `<div class="who">${who}</div><div class="txt"></div>`;
+  div.querySelector(".txt").textContent = text;
+  coachThread.appendChild(div);
+  coachThread.scrollTop = coachThread.scrollHeight;
+}
+
+async function fetchCoach(){
+  try{
+    const r = await fetch("/coach", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ user_id: 1, include_history: true })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j?.error || "coach failed");
+    setCoachText(j?.text || "");
+    renderQuickReplies(j?.quick_replies || []);
+  }catch(e){
+    // silencioso: não quebra o treino
+    setCoachText("Não consegui gerar o feedback agora. Tenta de novo em instantes.");
+    clearQuick();
+  }
+}
+
+async function coachAsk(msg){
+  const text = String(msg || "").trim();
+  if (!text) return;
+
+  appendCoachMsg("Você", text);
+
+  const ex = LAST_EX || {};
+  const sol = LAST_SOL || {};
+  const prompt =
+`Você é o BNA no modo FEEDBACK_COACH. Seja direto, pedagógico e curto.
+Contexto do exercício:
+- id: ${ex.id ?? "?"}
+- tópico: ${ex.topic ?? "?"}
+- dificuldade: ${ex.difficulty ?? "?"}
+- enunciado: ${ex.statement ?? ex.prompt ?? "?"}
+Resposta do usuário: ${sol.user_answer ?? sol.answer ?? "?"}
+Resultado: ${sol.correct === true ? "ACERTOU" : sol.correct === false ? "ERROU" : "?"}
+Feedback atual: ${LAST_COACH_TEXT || "(ainda não gerado)"}
+
+Pergunta do usuário: ${text}`;
+
+  try{
+    const r = await fetch("/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ message: prompt, user_id: 1 })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j?.error || "chat failed");
+    const out = j?.reply || j?.text || "(sem resposta)";
+    appendCoachMsg("BNA", out);
+  }catch(e){
+    appendCoachMsg("BNA", "Deu ruim aqui pra responder agora. Tenta novamente.");
+  }
+}
+
+coachSend?.addEventListener("click", () => coachAsk(coachInput.value).finally(()=>{ coachInput.value=""; }));
+coachInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    coachSend?.click();
+  }
+});
+
+document.getElementById("t-next").addEventListener("click", fetchExercise);
+  document.getElementById("t-submit").addEventListener("click", submitAttempt);
+  document.getElementById("t-answer").addEventListener("keydown", (e)=>{
+    if(e.key==="Enter") submitAttempt();
+  });
+
+  fetchExercise();
+</script>
+
+</body>
+</html>

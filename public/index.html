@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BrainMode — Exercícios</title>
+  
+<style>
+:root{
+  --bg:#0b1220; --panel:#0f172a; --panel2:#0b1324; --line:#223047;
+  --muted:#8fa3bf; --text:#e7eefc; --title:#f3f6ff;
+  --accent:#4f8cff; --accent2:#2f6cf6;
+  --good:#22c55e; --bad:#ef4444;
+  --shadow:0 16px 40px rgba(0,0,0,.35);
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background:
+    radial-gradient(900px 500px at 20% -10%, rgba(79,140,255,.18), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(34,197,94,.09), transparent 65%),
+    var(--bg);
+}
+a{ color:inherit; text-decoration:none }
+
+.top-bar{
+  position:sticky; top:0; z-index:50;
+  display:flex; justify-content:space-between; align-items:center; gap:16px;
+  padding:14px 18px;
+  background: rgba(11,19,36,.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(34,48,71,.7);
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:800; color:var(--title);
+  letter-spacing:.2px;
+}
+.brand-dot{
+  width:10px;height:10px;border-radius:999px;
+  background: linear-gradient(180deg, var(--accent), rgba(79,140,255,.35));
+  box-shadow: 0 0 24px rgba(79,140,255,.45);
+}
+.nav-desktop{
+  display:flex; gap:10px; align-items:center;
+}
+.nav-desktop a{
+  color: var(--muted);
+  font-size:13px;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid transparent;
+}
+.nav-desktop a:hover{
+  color: var(--text);
+  background: rgba(79,140,255,.10);
+  border-color: rgba(79,140,255,.18);
+}
+
+.page{
+  max-width:1040px;
+  margin:0 auto;
+  padding: 22px 18px 40px;
+}
+.grid-two{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:16px;
+}
+@media (min-width: 980px){
+  .grid-two{
+    grid-template-columns: 1fr 420px;
+    align-items:start;
+  }
+}
+
+.exercise-card{
+  background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(11,19,36,.95));
+  border: 1px solid rgba(34,48,71,.9);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 18px 18px 16px;
+}
+.exercise-head{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+  margin-bottom: 12px;
+}
+.exercise-title{
+  font-size: 15px; font-weight: 750; color: var(--title);
+}
+.exercise-meta{
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;
+}
+.badge{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:12px; color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(34,48,71,.9);
+  background: rgba(2,6,23,.25);
+}
+.statement{
+  margin: 14px 0 10px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.9);
+  background: rgba(2,6,23,.30);
+  font-size: 15px;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.section-label{
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing:.4px;
+  text-transform: uppercase;
+}
+.mcq-grid{ display:grid; gap:10px; }
+.mcq-option{
+  width:100%;
+  text-align:left;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.30);
+  color: var(--text);
+  cursor:pointer;
+  transition: transform .06s ease, border-color .12s ease, background .12s ease;
+  display:flex; align-items:flex-start; gap:10px;
+}
+.mcq-option:hover{
+  border-color: rgba(79,140,255,.55);
+  background: rgba(79,140,255,.08);
+}
+.mcq-option.selected{
+  border-color: rgba(79,140,255,.95);
+  background: rgba(79,140,255,.16);
+  box-shadow: 0 0 0 2px rgba(79,140,255,.12) inset;
+}
+.mcq-letter{
+  width:26px;height:26px;border-radius:10px;
+  display:grid; place-items:center;
+  border:1px solid rgba(34,48,71,.95);
+  background: rgba(15,23,42,.75);
+  color: var(--title); font-weight:800;
+  flex: 0 0 auto;
+}
+.answer-box{ display:flex; gap:10px; margin-top:12px; }
+.input{
+  flex:1;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.30);
+  color: var(--text);
+  outline:none;
+}
+.input:focus{
+  border-color: rgba(79,140,255,.85);
+  box-shadow: 0 0 0 3px rgba(79,140,255,.14);
+}
+.btn{
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(79,140,255,.55);
+  background: linear-gradient(180deg, rgba(79,140,255,.95), rgba(47,108,246,.92));
+  color: #071225;
+  font-weight: 850;
+  cursor:pointer;
+  transition: transform .06s ease, filter .12s ease;
+}
+.btn:hover{ filter: brightness(1.05); }
+.btn:active{ transform: scale(.995); }
+.ghost{
+  background: rgba(2,6,23,.25);
+  color: var(--text);
+  border: 1px solid rgba(34,48,71,.95);
+}
+.ghost:hover{
+  border-color: rgba(79,140,255,.55);
+  background: rgba(79,140,255,.08);
+}
+
+.feedback{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34,48,71,.95);
+  background: rgba(2,6,23,.20);
+  color: var(--muted);
+  font-size: 13px;
+  min-height: 42px;
+}
+.feedback.ok{ border-color: rgba(34,197,94,.35); color: rgba(226,255,240,.92); }
+.feedback.bad{ border-color: rgba(239,68,68,.35); color: rgba(255,235,235,.92); }
+
+.side-card{
+  background: rgba(15,23,42,.85);
+  border: 1px solid rgba(34,48,71,.9);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+.side-title{
+  font-size: 13px;
+  color: var(--title);
+  font-weight: 750;
+  margin-bottom: 10px;
+}
+.muted{ color: var(--muted); font-size: 13px; }
+
+.train-layout{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:16px;
+}
+@media (min-width: 980px){
+  .train-layout{
+    grid-template-columns: 1.15fr .85fr;
+    height: calc(100vh - 56px);
+    padding: 18px;
+  }
+  .train-layout > .exercise-card{ height:100%; overflow:auto; }
+  .train-chat{
+    height:100%;
+    overflow:hidden;
+    border-radius: var(--r);
+    border: 1px solid rgba(34,48,71,.9);
+    background: rgba(15,23,42,.85);
+    box-shadow: var(--shadow);
+  }
+}
+.train-chat iframe{ width:100%; height:100%; border:0; }
+.train-chat-toggle{ display:none; }
+@media (max-width: 980px){
+  .train-layout{ padding:14px 12px 22px; }
+  .train-chat-toggle{ display:flex; gap:10px; margin-top:12px; }
+  .train-chat-toggle .btn{ flex:1; }
+  .train-chat.collapsed{ display:none; }
+  .train-chat{ height: 420px; }
+}
+
+/* Mobile bottom nav */
+.bottom-nav{
+  display:none;
+}
+@media (max-width: 720px){
+  .nav-desktop{ display:none; }
+  .page{ padding-bottom: 92px; }
+  .answer-box{ flex-direction:column; }
+  .btn, .input{ width:100%; }
+  .bottom-nav{
+    display:flex;
+    position:fixed;
+    left:0; right:0; bottom:0;
+    padding:10px 12px 12px;
+    background: rgba(2,6,23,.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(34,48,71,.75);
+    gap:10px;
+    z-index:200;
+  }
+  .bottom-nav a{
+    flex:1;
+    text-align:center;
+    padding:10px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(34,48,71,.9);
+    background: rgba(15,23,42,.75);
+    color: var(--muted);
+    font-weight: 750;
+    font-size: 12px;
+  }
+  .bottom-nav a.active{
+    color: var(--title);
+    border-color: rgba(79,140,255,.7);
+    background: rgba(79,140,255,.18);
+    box-shadow: 0 0 0 2px rgba(79,140,255,.10) inset;
+  }
+}
+</style>
+
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']],
+        displayMath: [['\\[','\\]'], ['$$','$$']]
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+
+  <header class="top-bar">
+    <div class="brand"><span class="brand-dot"></span>BrainMode</div>
+    <nav class="nav-desktop">
+      <a href="chat.html">Chat</a>
+      <a href="index.html">Exercícios</a>
+      <a href="brainmode.html">Treino</a>
+    </nav>
+  </header>
+
+  <main class="page grid-two">
+    <section class="exercise-card">
+      <div class="exercise-head">
+        <div>
+          <div class="exercise-title">Exercício</div>
+          <div class="exercise-meta">
+            <span class="badge" id="ex-id">ID: <strong>—</strong></span>
+            <span class="badge" id="ex-topic">Tópico: <strong>—</strong></span>
+            <span class="badge" id="ex-diff">Dificuldade: <strong>—</strong></span>
+          </div>
+        </div>
+
+        <button class="btn ghost" id="btn-next" type="button">Novo</button>
+      </div>
+
+      <div class="statement" id="ex-statement">Carregando exercício...</div>
+
+      <div id="mcq-wrap" style="display:none;">
+        <div class="section-label">Alternativas</div>
+        <div class="mcq-grid" id="mcq-grid"></div>
+      </div>
+
+      <div class="section-label">Resposta livre</div>
+      <div class="answer-box">
+        <input class="input" id="text-answer" type="text" placeholder="Digite sua resposta (opcional) — útil pra cálculo/expressão" />
+        <button class="btn" id="btn-submit" type="button">Responder</button>
+      </div>
+
+      <div class="feedback" id="feedback">Dica: se vier alternativas, você pode clicar numa letra e ainda escrever no campo.</div>
+    </section>
+
+    <aside class="side-card">
+      <div class="side-title">Como isso funciona</div>
+      <div class="muted">
+        • No modo Exercícios, você pratica rápido.<br/>
+        • Se o exercício vier com A–E, você escolhe uma alternativa (guia).<br/>
+        • O campo livre é pra treinar cálculo de verdade (sem chute).<br/><br/>
+        Quer o BrainMode com feedback do BNA ao lado? Vai em <b>Treino</b>.
+      </div>
+    </aside>
+  </main>
+
+  <nav class="bottom-nav">
+    <a id="nav-chat" href="chat.html">Chat</a>
+    <a id="nav-ex" href="index.html">Exercícios</a>
+    <a id="nav-train" href="brainmode.html">Treino</a>
+  </nav>
+
+
+<script>
+(function(){
+  const p = (location.pathname || "").toLowerCase();
+  const map = [
+    {id:"nav-chat", key:"chat.html"},
+    {id:"nav-ex", key:"index.html"},
+    {id:"nav-train", key:"brainmode.html"},
+  ];
+  map.forEach(x=>{
+    const el = document.getElementById(x.id);
+    if(!el) return;
+    if(p.endsWith("/"+x.key) || p.endsWith(x.key) || (x.key==="index.html" && (p==="/" || p.endsWith("/index") || p.endsWith("/")))){
+      el.classList.add("active");
+    }
+  });
+})();
+</script>
+
+
+<script>
+  // Exercícios: fetch + render (tenta endpoints comuns)
+  let currentExercise = null;
+  let selectedMCQ = null;
+
+  function setBadge(id, value){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const strong = el.querySelector("strong");
+    if(strong) strong.textContent = (value ?? "—");
+    else el.textContent = (value ?? "—");
+  }
+
+  function setFeedback(msg, kind){
+    const fb = document.getElementById("feedback");
+    fb.classList.remove("ok","bad");
+    if(kind) fb.classList.add(kind);
+    fb.textContent = msg;
+  }
+
+  function renderExercise(ex){
+    currentExercise = ex;
+    selectedMCQ = null;
+
+    setBadge("ex-id", ex?.id ?? "—");
+    setBadge("ex-topic", ex?.topic ?? ex?.topico ?? "—");
+    setBadge("ex-diff", ex?.difficulty ?? ex?.dificuldade ?? "—");
+
+    const st = ex?.statement || ex?.enunciado || ex?.question || ex?.title || "Enunciado não encontrado.";
+    document.getElementById("ex-statement").textContent = st;
+
+    const wrap = document.getElementById("mcq-wrap");
+    const grid = document.getElementById("mcq-grid");
+    grid.innerHTML = "";
+
+    const opts = ex?.mcq?.options;
+    if(Array.isArray(opts) && opts.length){
+      wrap.style.display = "block";
+      opts.forEach((opt, i) => {
+        const letter = opt.letter || String.fromCharCode(65+i);
+        const value = opt.value ?? opt.text ?? opt.label ?? "";
+        const btn = document.createElement("button");
+        btn.className = "mcq-option";
+        btn.type = "button";
+        btn.innerHTML = `<div class="mcq-letter">${letter}</div><div>${value}</div>`;
+        btn.addEventListener("click", () => {
+          grid.querySelectorAll(".mcq-option").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          selectedMCQ = { letter, value };
+          setFeedback(`Selecionado: ${letter}) ${value}`, null);
+        });
+        grid.appendChild(btn);
+      });
+    } else {
+      wrap.style.display = "none";
+      selectedMCQ = null;
+    }
+  }
+
+  async function fetchExercise(){
+    const endpoints = ["/exercise/next", "/exercises-random", "/exercise/random"];
+    for(const url of endpoints){
+      try{
+        const r = await fetch(url, { cache: "no-store" });
+        if(!r.ok) continue;
+        const payload = await r.json();
+
+        // aceita { ok: true, data: {...} } ou direto {...}
+        const ex = payload?.data ? payload.data : payload;
+        if(ex && (ex.statement || ex.question || ex.title || ex.id != null)){
+          renderExercise(ex);
+          setFeedback("Pronto. Responda do seu jeito — letra e/ou texto.", null);
+          return;
+        }
+      }catch(e){}
+    }
+    setFeedback("Não consegui carregar exercício (endpoint não respondeu). Verifique /exercise/next ou /exercises-random no backend.", "bad");
+  }
+
+  async function submitAttempt(){
+    if(!currentExercise){
+      setFeedback("Ainda não carregou exercício.", "bad");
+      return;
+    }
+
+    const typed = (document.getElementById("text-answer").value || "").trim();
+    const mcqVal = selectedMCQ ? String(selectedMCQ.value) : "";
+    const answer = typed || mcqVal;
+
+    if(!answer){
+      setFeedback("Escolha uma alternativa ou escreva uma resposta.", "bad");
+      return;
+    }
+
+    const body = {
+      exercise_id: currentExercise.id,
+      answer,
+      response_mode: selectedMCQ ? "hybrid" : "text",
+      selected_letter: selectedMCQ ? selectedMCQ.letter : null,
+    };
+
+    try{
+      const r = await fetch("/solve", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(body)
+      });
+
+      if(!r.ok){
+        setFeedback("Backend não aceitou /solve. Veja logs do servidor.", "bad");
+        return;
+      }
+
+      const out = await r.json();
+      const ok = (out?.is_correct ?? out?.correct ?? out?.ok);
+
+      if(ok === true) setFeedback("✅ Boa! Se quiser, peça um exercício novo.", "ok");
+      else if(ok === false) setFeedback("❌ Não foi dessa. Quer tentar explicar onde travou?", "bad");
+      else setFeedback("Resposta enviada. No modo Treino, o BNA dá feedback ao lado.", null);
+
+    }catch(e){
+      setFeedback("Erro ao enviar resposta para /solve. Verifique se o servidor está online.", "bad");
+    }
+  }
+
+  document.getElementById("btn-next").addEventListener("click", fetchExercise);
+  document.getElementById("btn-submit").addEventListener("click", submitAttempt);
+  document.getElementById("text-answer").addEventListener("keydown", (e)=>{
+    if(e.key==="Enter") submitAttempt();
+  });
+
+  fetchExercise();
+</script>
+
+
+<script>
+  function bmTypeset(el){
+    if(window.MathJax && window.MathJax.typesetPromise){
+      window.MathJax.typesetPromise(el ? [el] : undefined).catch(()=>{});
+    }
+  }
+</script>
+
+
+<script>
+(function(){
+  function getOpts(ex){
+    if(!ex) return null;
+    const o = ex.options || ex.alternatives || ex.choices || ex.mcq_options || null;
+    return (Array.isArray(o) && o.length) ? o : null;
+  }
+  function renderMCQ(ex){
+    const box = document.getElementById('bmMcqBox');
+    const list = document.getElementById('bmMcqOptions');
+    const ta = document.getElementById('answer');
+    if(!box || !list || !ta) return;
+    const opts = getOpts(ex);
+    list.innerHTML = '';
+    document.querySelectorAll('input[name="bm_mcq"]').forEach(i=>{ i.checked=false; });
+    if(!opts){
+      box.style.display='none';
+      ta.style.display='';
+      return;
+    }
+    box.style.display='';
+    ta.style.display='none';
+    const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    opts.slice(0,10).forEach((opt,i)=>{
+      const letter = letters[i] || String(i+1);
+      const text = (typeof opt==='string') ? opt : (opt?.text || opt?.label || JSON.stringify(opt));
+      const id = 'bm_mcq_' + i;
+      const row = document.createElement('label');
+      row.setAttribute('for', id);
+      row.style.display='flex';
+      row.style.gap='10px';
+      row.style.alignItems='flex-start';
+      row.style.padding='10px 12px';
+      row.style.borderRadius='14px';
+      row.style.border='1px solid rgba(255,255,255,.08)';
+      row.style.background='rgba(255,255,255,.03)';
+      row.style.cursor='pointer';
+
+      const radio = document.createElement('input');
+      radio.type='radio';
+      radio.name='bm_mcq';
+      radio.id=id;
+      radio.value=letter;
+      radio.style.marginTop='3px';
+
+      const body = document.createElement('div');
+      body.style.flex='1';
+      body.innerHTML = "<b style='color:rgba(255,255,255,.92)'>" + letter + ")</b> <span style='color:rgba(255,255,255,.88)'></span>";
+      const span = body.querySelector('span');
+      span.textContent = text;
+
+      row.appendChild(radio);
+      row.appendChild(body);
+      list.appendChild(row);
+
+      if(window.MathJax && window.MathJax.typesetPromise){
+        window.MathJax.typesetPromise([span]).catch(()=>{});
+      }
+    });
+  }
+
+  window.addEventListener('brainmode:exerciseLoaded', (e)=>{
+    const ex = e.detail || null;
+    renderMCQ(ex);
+    const st = document.getElementById('statement');
+    if(st) bmTypeset(st);
+  });
+
+  const st = document.getElementById('statement');
+  if(st && window.MutationObserver){
+    const mo = new MutationObserver(()=>bmTypeset(st));
+    mo.observe(st, { childList:true, subtree:true, characterData:true });
+  }
+})();
+</script>
+
+</body>
+</html>
